@@ -1,30 +1,37 @@
 const path = require('path');
-const HtmlWebPackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/test.js',
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname + '/build'),
+  mode: 'development',
+  resolve: {
+    extensions: ['.jsx', '.js'],
   },
-  mode: 'none',
+  entry: {
+    app: ['./index.jsx'],
+  },
   module: {
     rules: [
       {
-        test: /\.html$/,
-        use: [
-          {
-            loader: 'html-loader',
-            options: { minimize: true },
-          },
-        ],
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+        exclude: /node_modules/, //제외함
+      },
+      {
+        test: /\.jsx$/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+        },
       },
     ],
   },
   plugins: [
-    new HtmlWebPackPlugin({
-      template: './public/index.html',
-      filename: 'index.html',
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, './index.html'),
     }),
   ],
+  output: {
+    path: path.resolve(__dirname, 'docs'),
+    filename: 'app.js',
+  },
 };
