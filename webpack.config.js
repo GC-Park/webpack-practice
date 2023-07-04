@@ -1,37 +1,46 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const path = require("path");
+const webpack = require('webpack');
 
-module.exports = {
-  mode: 'development',
-  resolve: {
-    extensions: ['.jsx', '.js'],
-  },
-  entry: {
-    app: ['./index.jsx'],
-  },
-  module: {
-    rules: [
-      {
-        test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
-        exclude: /node_modules/, //제외함
-      },
-      {
-        test: /\.jsx$/,
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env', '@babel/preset-react'],
+module.exports = (env, argv) => {
+    const prod = argv.mode === "production";
+    
+    return {
+        mode: prod ? "production" : "development",
+        devtool: prod ? "hidden-source-map" : "eval",
+        entry: "./src/index.tsx",
+        output: {
+            path: path.join(__dirname, "/dist"),
+            filename: "[name].js",
         },
-      },
-    ],
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, './index.html'),
-    }),
-  ],
-  output: {
-    path: path.resolve(__dirname, 'docs'),
-    filename: 'app.js',
-  },
+        devServer: {
+            port: 3000,
+            hot: true,
+        },
+        resolve: {
+            extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
+        module: {
+            rules: [
+            {
+                test: /\.tsx?$/,
+                use: ["babel-loader", "ts-loader"],
+            },
+            ],
+        },
+        plugins: [
+            new webpack.ProvidePlugin({
+                React: "react",
+            }),
+            new HtmlWebpackPlugin({
+                template: './public/index.html',
+                minify: process.env.NODE_ENV === 'production' ? {
+                    collapseWhitespace: true,
+                    removeComments: true,
+                } : false,
+            }),
+            new CleanWebpackPlugin(),
+        ],
+    }
 };
